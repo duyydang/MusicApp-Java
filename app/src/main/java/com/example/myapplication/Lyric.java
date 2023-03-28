@@ -1,19 +1,19 @@
 package com.example.myapplication;
 
 public class Lyric {
-    private int startTime;
+    private double startTime;
     private String text;
 
-    public Lyric(int startTime, String text) {
+    public Lyric(double startTime, String text) {
         this.startTime = startTime;
         this.text = text;
     }
 
-    public int getStartTime() {
+    public double getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(int startTime) {
+    public void setStartTime(double startTime) {
         this.startTime = startTime;
     }
 
