@@ -104,33 +104,17 @@
         app:layout_constraintHorizontal_bias="0.505"
         app:layout_constraintStart_toEndOf="@+id/imgPlay" />
 
+    <ListView
 
-    <TextView
-        android:id="@+id/lyrics_text"
-        android:layout_width="352dp"
-        android:layout_height="64dp"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:id="@+id/listViewLyric"
+        android:layout_width="374dp"
+        android:layout_height="94dp"
+        android:layout_marginTop="348dp"
         app:layout_constraintBottom_toTopOf="@+id/textViewTimeSong"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.508"
+        app:layout_constraintHorizontal_bias="0.605"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewTitle"
-        app:layout_constraintVertical_bias="0.715" />
-
-    <TextView
-        android:id="@+id/lyrics_text2"
-        android:layout_width="352dp"
-        android:layout_height="64dp"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/textViewTimeSong"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.508"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lyrics_text"
         app:layout_constraintVertical_bias="0.0" />
 
 
