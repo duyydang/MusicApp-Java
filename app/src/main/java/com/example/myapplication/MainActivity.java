@@ -1,53 +1,31 @@
 package com.example.myapplication;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-import android.graphics.Color;
+
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.method.ScrollingMovementMethod;
-import android.text.style.ForegroundColorSpan;
+
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.TranslateAnimation;
-import android.widget.ArrayAdapter;
+
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 public class MainActivity extends AppCompatActivity {
     TextView txtTitle, txtTimeTotal, txtTimeSong;
-    ListView lvLyric;
+    RecyclerView recyclerViewSong;
     SeekBar skSong;
     MediaPlayer mediaPlayer = new MediaPlayer();
     ImageButton btnPlay;
@@ -55,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> lyricLineArraylist = new ArrayList<>();
     ArrayList<Double> animationTimeArrrayList = new ArrayList<>();
     StringBuilder lyric;
-
+    LyricLineAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,10 +52,8 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e("Lyrics", "Error reading XML file: " + e.getMessage());
         }
-        ArrayAdapter adapterListViewLyric = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, lyricLineArraylist);
-        lvLyric.setAdapter(adapterListViewLyric);
-        // start mp3 and call fuction
 
+        // start mp3 and call fuction
         mediaPlayer.start();
         SetTimeTotal();
         UpdateTimeSong();
@@ -102,21 +78,26 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     private void scrollListView() {
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
-            int scrollPosition  = 1;
+            int scrollPosition = 2;
+
             @Override
             public void run() {
-                double currentPosition = mediaPlayer.getCurrentPosition()/1000;
-                Log.d("currentTime", currentPosition+" : "+scrollPosition);
-                if (currentPosition >= animationTimeArrrayList.get(scrollPosition)){
-                    lvLyric.smoothScrollToPosition(scrollPosition);
+                // get current time mp3 play
+                double currentPosition = mediaPlayer.getCurrentPosition() / 1000;
+                if (currentPosition >= animationTimeArrrayList.get(scrollPosition)) {
+                    recyclerViewSong.smoothScrollToPosition(scrollPosition);
                     scrollPosition++;
                 }
-                handler.postDelayed(this, 300);
+                if(scrollPosition == animationTimeArrrayList.size()){
+                    scrollPosition=animationTimeArrrayList.size();
+                }
+                handler.postDelayed(this, 100);
             }
-        }, 300);
+        }, 1000);
     }
 
     private void readLyricsFromXml(int resourceId) throws XmlPullParserException, IOException {
@@ -160,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         inputStream.close();
     }
 
-    //Can use "for" in lyricArrayList taken above and look at first Letter. If "Upcase" then this is First Line
+    //Can use "for()" in lyricArrayList taken above and find first Letter. If first Letter is "Upcase" then this is First Line
     //But add this funtion can use if Lyric not good ( Ex: All lyrics are capitalized )
     //This funtion can be drop if lyric "GOOD"
     public void readTimeLineFromXML(int resourceId) throws XmlPullParserException, IOException {
@@ -183,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Get the start time of the first "line" tag
                 Double startTime = Double.valueOf(parser.getAttributeValue(null, "va"));
-                animationTimeArrrayList.add(startTime);
+                animationTimeArrrayList.add(startTime - 0.5);
                 Log.d("startTime", startTime + "");
                 // Exit the loop
             }
@@ -223,6 +204,12 @@ public class MainActivity extends AppCompatActivity {
         txtTimeTotal = (TextView) findViewById(R.id.textViewTimeTotal);
         skSong = (SeekBar) findViewById(R.id.seekBar);
         btnPlay = (ImageButton) findViewById(R.id.imgPlay);
-        lvLyric = (ListView) findViewById(R.id.listViewLyric);
+        //init recyclerView
+        recyclerViewSong = (RecyclerView) findViewById(R.id.recyclerviewSong);
+        recyclerViewSong.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        recyclerViewSong.setLayoutManager(layoutManager);
+        adapter = new LyricLineAdapter(this, lyricLineArraylist, lyricArrayList);
+        recyclerViewSong.setAdapter(adapter);
     }
 }
