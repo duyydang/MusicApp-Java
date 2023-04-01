@@ -107,7 +107,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerviewSong"
         android:layout_width="398dp"
-        android:layout_height="119dp"
+        android:layout_height="50dp"
         android:layout_marginTop="88dp"
         app:layout_constraintBottom_toTopOf="@+id/seekBar"
         app:layout_constraintEnd_toEndOf="parent"

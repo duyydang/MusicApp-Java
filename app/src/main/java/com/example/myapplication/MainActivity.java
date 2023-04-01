@@ -1,17 +1,25 @@
 package com.example.myapplication;
 
 
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -41,8 +49,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         AnhXa();
+        lyricLineArraylist.add("...!");
         mediaPlayer = MediaPlayer.create(this, R.raw.beat);
-
         // call readLyricFromXml and try/catch
         try {
             readLyricsFromXml(R.raw.lyric);
@@ -52,12 +60,14 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e("Lyrics", "Error reading XML file: " + e.getMessage());
         }
-
+        adapter = new LyricLineAdapter(this, lyricLineArraylist, lyricArrayList,lyricLineArraylist);
+        recyclerViewSong.setAdapter(adapter);
         // start mp3 and call fuction
         mediaPlayer.start();
         SetTimeTotal();
         UpdateTimeSong();
         scrollListView();
+
 
         //Change time playing when change seekbar
         skSong.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -82,23 +92,33 @@ public class MainActivity extends AppCompatActivity {
     private void scrollListView() {
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
-            int scrollPosition = 2;
+            int scrollPosition = 1;
 
             @Override
             public void run() {
                 // get current time mp3 play
                 double currentPosition = mediaPlayer.getCurrentPosition() / 1000;
                 if (currentPosition >= animationTimeArrrayList.get(scrollPosition)) {
-                    recyclerViewSong.smoothScrollToPosition(scrollPosition);
+
+                    recyclerViewSong.post(() -> {
+                        recyclerViewSong.getLayoutManager().scrollToPosition(scrollPosition);
+                        View view = recyclerViewSong.getLayoutManager().findViewByPosition(scrollPosition);
+                        if (view != null) {
+                            // Item đã được hiển thị trên màn hình
+                            // Thực hiện các thao tác khác tại đây
+                        } else {
+                            // Item vẫn chưa được hiển thị trên màn hình
+                            // Có thể thực hiện các thao tác khác tại đây hoặc đợi một khoảng thời gian
+                        }
+                    });
+
                     scrollPosition++;
                 }
-                if(scrollPosition == animationTimeArrrayList.size()){
-                    scrollPosition=animationTimeArrrayList.size();
-                }
-                handler.postDelayed(this, 100);
+                handler.postDelayed(this, 50);
             }
-        }, 1000);
+        }, 100);
     }
+
 
     private void readLyricsFromXml(int resourceId) throws XmlPullParserException, IOException {
         // Open the input stream for the XML file
@@ -161,10 +181,9 @@ public class MainActivity extends AppCompatActivity {
                 while (parser.getName().equals("i") == false) {
                     parser.nextTag();
                 }
-
                 // Get the start time of the first "line" tag
                 Double startTime = Double.valueOf(parser.getAttributeValue(null, "va"));
-                animationTimeArrrayList.add(startTime - 0.5);
+                animationTimeArrrayList.add(startTime-0.2);
                 Log.d("startTime", startTime + "");
                 // Exit the loop
             }
@@ -209,7 +228,6 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewSong.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerViewSong.setLayoutManager(layoutManager);
-        adapter = new LyricLineAdapter(this, lyricLineArraylist, lyricArrayList);
-        recyclerViewSong.setAdapter(adapter);
+
     }
 }
