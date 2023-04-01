@@ -25,14 +25,10 @@ public class LyricLineAdapter extends RecyclerView.Adapter<LyricLineAdapter.View
     List<String> lyricLineList;
     ArrayList<Lyric> lyricArrayList;
 
-    ArrayList<String> lyricLineArraylist = new ArrayList<>();
-
-
-    public LyricLineAdapter(Context context, List<String> lyricLineList, ArrayList<Lyric> lyricArrayList, ArrayList<String> lyricLineArraylist) {
+    public LyricLineAdapter(Context context, List<String> lyricLineList, ArrayList<Lyric> lyricArrayList) {
         this.context = context;
         this.lyricLineList = lyricLineList;
         this.lyricArrayList = lyricArrayList;
-        this.lyricLineArraylist = lyricLineArraylist;
     }
 
     @NonNull
@@ -48,7 +44,6 @@ public class LyricLineAdapter extends RecyclerView.Adapter<LyricLineAdapter.View
     }
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.txtLyric.setText(lyricLineList.get(position));
         animateText(holder.txtLyric,lyricLineList.get(position),50);
     }
 

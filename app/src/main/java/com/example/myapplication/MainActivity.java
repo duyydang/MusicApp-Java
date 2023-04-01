@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import android.view.View;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e("Lyrics", "Error reading XML file: " + e.getMessage());
         }
-        adapter = new LyricLineAdapter(this, lyricLineArraylist, lyricArrayList,lyricLineArraylist);
+        adapter = new LyricLineAdapter(this, lyricLineArraylist, lyricArrayList);
         recyclerViewSong.setAdapter(adapter);
         // start mp3 and call fuction
         mediaPlayer.start();
@@ -183,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 // Get the start time of the first "line" tag
                 Double startTime = Double.valueOf(parser.getAttributeValue(null, "va"));
-                animationTimeArrrayList.add(startTime-0.2);
+                animationTimeArrrayList.add(startTime-0.5);
                 Log.d("startTime", startTime + "");
                 // Exit the loop
             }
