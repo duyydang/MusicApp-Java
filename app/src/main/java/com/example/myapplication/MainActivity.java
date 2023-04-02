@@ -31,27 +31,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    TextView txtTitle, txtTimeTotal, txtTimeSong;
+    TextView txtTitle, txtTimeTotal, txtTimeSong,txtLyric;
     RecyclerView recyclerViewSong;
     SeekBar skSong;
     MediaPlayer mediaPlayer = new MediaPlayer();
     ImageButton btnPlay;
-    ArrayList<Lyric> lyricArrayList = new ArrayList<>();
+    ArrayList<Lyric> fullLyricLineArrayList = new ArrayList<>();
     ArrayList<String> lyricLineArraylist = new ArrayList<>();
-    ArrayList<Double> animationTimeArrrayList = new ArrayList<>();
+    ArrayList<Float> timeLyricLine = new ArrayList<>();
+
     StringBuilder lyric;
     LyricLineAdapter adapter;
     private int mCurrentLinePosition = 0;
-    private double mCurrentLineStartTime = 0;
-
+    private float mCurrentLineStartTime = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         AnhXa();
+        //Set mp3 play
         mediaPlayer = MediaPlayer.create(this, R.raw.beat);
         // call readLyricFromXml and try/catch
         try {
@@ -62,8 +64,9 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e("Lyrics", "Error reading XML file: " + e.getMessage());
         }
+        createArray();
 
-        // start mp3 and call fuction
+        // Start mp3 and call fuction
         mediaPlayer.start();
         SetTimeTotal();
         UpdateTimeSong();
@@ -72,12 +75,13 @@ public class MainActivity extends AppCompatActivity {
         skSong.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int positon, boolean b) {
-                double currentPosition = positon/1000;
-                adapter.setmCurrentPostion(currentPosition);
-                for (int i = 0; i < animationTimeArrrayList.size() - 1; i++) {
-                    double startTime = animationTimeArrrayList.get(i);
-                    double nextStartTime = animationTimeArrrayList.get(i + 1);
+                float currentPosition = positon / 1000;
+                adapter.setmCurrentPostion(positon);
+                for (int i = 0; i < timeLyricLine.size() - 1; i++) {
+                    float startTime = timeLyricLine.get(i);
+                    float nextStartTime = timeLyricLine.get(i + 1);
                     if (currentPosition >= startTime && currentPosition < nextStartTime) {
+                        Log.d("startTime", startTime + "");
                         // Cập nhật vị trí của dòng hiện tại đang được phát
                         mCurrentLinePosition = i;
                         // Cập nhật thời gian bắt đầu của dòng hiện tại đang được phát
@@ -88,15 +92,27 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
 
             }
+
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mediaPlayer.seekTo(skSong.getProgress());
             }
         });
+    }
+    private void createArray(){
+        for (int i=0;i<fullLyricLineArrayList.size();i++){
+            char ch = fullLyricLineArrayList.get(i).getText().charAt(0);
+            if (Character.isUpperCase(ch)){
+
+            } else {
+
+            }
+        }
     }
 
     private void readLyricsFromXml(int resourceId) throws XmlPullParserException, IOException {
@@ -116,13 +132,12 @@ public class MainActivity extends AppCompatActivity {
         while (eventType != XmlPullParser.END_DOCUMENT) {
             if (eventType == XmlPullParser.START_TAG && parser.getName().equals("i")) {
                 // Extract the start time and text data for the line
-                double startTime = Double.parseDouble(parser.getAttributeValue(null, "va"));
+                float startTime = Float.parseFloat(parser.getAttributeValue(null, "va"));
                 String text = parser.nextText();
-
-                // Add text and time
-                Log.d("Lyrics", "Start time: " + startTime + ", Text: " + text);
-                lyric.append(text).append(" ");
-                lyricArrayList.add(new Lyric(startTime, text));
+                //build Lyric for lyricLineArraylist
+                lyric.append(text);
+                // this is another arrayList. It is arrayList include startTime and Text
+                fullLyricLineArrayList.add(new Lyric(startTime,text));
             } else
                 // If meet new Line then ...
                 if (eventType == XmlPullParser.START_TAG && parser.getName().equals("param")) {
@@ -140,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         inputStream.close();
     }
 
-    //Can use "for()" in lyricArrayList taken above and find first Letter. If first Letter is "Upcase" then this is First Line
+    //Can use "for()" in fullLyricLineArrayList taken above and find first Letter. If first Letter is "Upcase" then this is First Line
     //But add this funtion can use if Lyric not good ( Ex: All lyrics are capitalized )
     //This funtion can be drop if lyric "GOOD"
     public void readTimeLineFromXML(int resourceId) throws XmlPullParserException, IOException {
@@ -161,8 +176,8 @@ public class MainActivity extends AppCompatActivity {
                     parser.nextTag();
                 }
                 // Get the start time of the first "line" tag
-                Double startTime = Double.valueOf(parser.getAttributeValue(null, "va"));
-                animationTimeArrrayList.add(startTime-0.2);
+                float startTime = Float.valueOf(parser.getAttributeValue(null, "va"));
+                timeLyricLine.add((float) (startTime - 0.2));
                 Log.d("startTime", startTime + "");
                 // Exit the loop
             }
@@ -170,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
         }
         inputStream.close();
     }
-    // Use the start time
 
     private void UpdateTimeSong() {
         Handler handler = new Handler();
@@ -207,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewSong.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerViewSong.setLayoutManager(layoutManager);
-        adapter = new LyricLineAdapter(this, lyricLineArraylist, lyricArrayList);
+        adapter = new LyricLineAdapter(this, lyricLineArraylist);
         recyclerViewSong.setAdapter(adapter);
     }
 }
