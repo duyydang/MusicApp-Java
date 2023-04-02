@@ -56,58 +56,66 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
-        android:scaleType="fitXY"
         android:id="@+id/imgPlay"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginStart="40dp"
         android:layout_marginBottom="52dp"
         android:background="@null"
+        android:scaleType="fitXY"
         android:src="@drawable/play"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imgPre" />
+        app:layout_constraintStart_toEndOf="@+id/imgPre"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar"
+        app:layout_constraintVertical_bias="1.0" />
 
     <ImageButton
-        android:scaleType="fitXY"
         android:id="@+id/imgPre"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginStart="48dp"
         android:layout_marginBottom="52dp"
         android:background="@null"
+        android:scaleType="fitXY"
         android:src="@drawable/previous"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar"
+        app:layout_constraintVertical_bias="1.0" />
 
     <ImageButton
-        android:scaleType="fitXY"
         android:id="@+id/imgNext"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginEnd="36dp"
         android:layout_marginBottom="52dp"
         android:background="@null"
+        android:scaleType="fitXY"
         android:src="@drawable/next"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar"
+        app:layout_constraintVertical_bias="1.0" />
 
     <ImageButton
-        android:scaleType="fitXY"
         android:id="@+id/imgStop"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginBottom="52dp"
         android:background="@null"
+        android:scaleType="fitXY"
         android:src="@drawable/stop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/imgNext"
-        app:layout_constraintHorizontal_bias="0.505"
-        app:layout_constraintStart_toEndOf="@+id/imgPlay" />
+        app:layout_constraintHorizontal_bias="0.494"
+        app:layout_constraintStart_toEndOf="@+id/imgPlay"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar"
+        app:layout_constraintVertical_bias="1.0" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerviewSong"
-        android:layout_width="398dp"
-        android:layout_height="50dp"
+        android:layout_width="392dp"
+        android:layout_height="65dp"
         android:layout_marginTop="88dp"
         app:layout_constraintBottom_toTopOf="@+id/seekBar"
         app:layout_constraintEnd_toEndOf="parent"

@@ -25,6 +25,12 @@ public class LyricLineAdapter extends RecyclerView.Adapter<LyricLineAdapter.View
     List<String> lyricLineList;
     ArrayList<Lyric> lyricArrayList;
 
+    double mCurrentPostion;
+
+    public void setmCurrentPostion(double mCurrentPostion) {
+        this.mCurrentPostion = mCurrentPostion;
+    }
+
     public LyricLineAdapter(Context context, List<String> lyricLineList, ArrayList<Lyric> lyricArrayList) {
         this.context = context;
         this.lyricLineList = lyricLineList;
@@ -44,6 +50,15 @@ public class LyricLineAdapter extends RecyclerView.Adapter<LyricLineAdapter.View
     }
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Log.d("positionCurrent", position+"");
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // Loading highlight Word this
+                handler.postDelayed(this,100);
+            }
+        },100);
         animateText(holder.txtLyric,lyricLineList.get(position),50);
     }
 
@@ -66,6 +81,7 @@ public class LyricLineAdapter extends RecyclerView.Adapter<LyricLineAdapter.View
         };
         handler.postDelayed(runnable, 500);
     }
+
     public class ViewHolder extends RecyclerView.ViewHolder{
         TextView txtLyric;
         public ViewHolder(@NonNull View itemView) {

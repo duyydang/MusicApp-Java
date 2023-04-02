@@ -43,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Double> animationTimeArrrayList = new ArrayList<>();
     StringBuilder lyric;
     LyricLineAdapter adapter;
+    private int mCurrentLinePosition = 0;
+    private double mCurrentLineStartTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         AnhXa();
-        lyricLineArraylist.add("...!");
         mediaPlayer = MediaPlayer.create(this, R.raw.beat);
         // call readLyricFromXml and try/catch
         try {
@@ -61,65 +62,42 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e("Lyrics", "Error reading XML file: " + e.getMessage());
         }
-        adapter = new LyricLineAdapter(this, lyricLineArraylist, lyricArrayList);
-        recyclerViewSong.setAdapter(adapter);
+
         // start mp3 and call fuction
         mediaPlayer.start();
         SetTimeTotal();
         UpdateTimeSong();
-        scrollListView();
-
 
         //Change time playing when change seekbar
         skSong.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-
+            public void onProgressChanged(SeekBar seekBar, int positon, boolean b) {
+                double currentPosition = positon/1000;
+                adapter.setmCurrentPostion(currentPosition);
+                for (int i = 0; i < animationTimeArrrayList.size() - 1; i++) {
+                    double startTime = animationTimeArrrayList.get(i);
+                    double nextStartTime = animationTimeArrrayList.get(i + 1);
+                    if (currentPosition >= startTime && currentPosition < nextStartTime) {
+                        // Cập nhật vị trí của dòng hiện tại đang được phát
+                        mCurrentLinePosition = i;
+                        // Cập nhật thời gian bắt đầu của dòng hiện tại đang được phát
+                        mCurrentLineStartTime = startTime;
+                        // Cuộn ListView xuống dòng hiện tại đang được phát
+                        recyclerViewSong.getLayoutManager().scrollToPosition(mCurrentLinePosition);
+                        break;
+                    }
+                }
             }
-
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
 
             }
-
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mediaPlayer.seekTo(skSong.getProgress());
             }
         });
     }
-
-
-    private void scrollListView() {
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            int scrollPosition = 1;
-
-            @Override
-            public void run() {
-                // get current time mp3 play
-                double currentPosition = mediaPlayer.getCurrentPosition() / 1000;
-                if (currentPosition >= animationTimeArrrayList.get(scrollPosition)) {
-
-                    recyclerViewSong.post(() -> {
-                        recyclerViewSong.getLayoutManager().scrollToPosition(scrollPosition);
-                        View view = recyclerViewSong.getLayoutManager().findViewByPosition(scrollPosition);
-                        if (view != null) {
-                            // Item đã được hiển thị trên màn hình
-                            // Thực hiện các thao tác khác tại đây
-                        } else {
-                            // Item vẫn chưa được hiển thị trên màn hình
-                            // Có thể thực hiện các thao tác khác tại đây hoặc đợi một khoảng thời gian
-                        }
-                    });
-
-                    scrollPosition++;
-                }
-                handler.postDelayed(this, 50);
-            }
-        }, 100);
-    }
-
 
     private void readLyricsFromXml(int resourceId) throws XmlPullParserException, IOException {
         // Open the input stream for the XML file
@@ -184,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 // Get the start time of the first "line" tag
                 Double startTime = Double.valueOf(parser.getAttributeValue(null, "va"));
-                animationTimeArrrayList.add(startTime-0.5);
+                animationTimeArrrayList.add(startTime-0.2);
                 Log.d("startTime", startTime + "");
                 // Exit the loop
             }
@@ -229,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewSong.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerViewSong.setLayoutManager(layoutManager);
-
+        adapter = new LyricLineAdapter(this, lyricLineArraylist, lyricArrayList);
+        recyclerViewSong.setAdapter(adapter);
     }
 }
