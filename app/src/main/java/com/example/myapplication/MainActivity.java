@@ -1,26 +1,17 @@
 package com.example.myapplication;
 
-
-import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.ForegroundColorSpan;
-import android.util.DisplayMetrics;
 import android.util.Log;
 
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -31,22 +22,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    TextView txtTitle, txtTimeTotal, txtTimeSong,txtLyric;
+    TextView txtTitle, txtTimeTotal, txtTimeSong;
     RecyclerView recyclerViewSong;
     SeekBar skSong;
     MediaPlayer mediaPlayer = new MediaPlayer();
     ImageButton btnPlay;
-    ArrayList<Lyric> fullLyricLineArrayList = new ArrayList<>();
     ArrayList<String> lyricLineArraylist = new ArrayList<>();
     ArrayList<Float> timeLyricLine = new ArrayList<>();
-
     StringBuilder lyric;
     LyricLineAdapter adapter;
     private int mCurrentLinePosition = 0;
-    private float mCurrentLineStartTime = 0;
+
+    long[][] wordTimes = new long[26][];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,55 +53,59 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e("Lyrics", "Error reading XML file: " + e.getMessage());
         }
-        createArray();
+
+//        // Test mảng 2 chiều
+        wordTimes[0] = new long[7];
+        wordTimes[0][0] = 35144;
+        wordTimes[0][1] = 35587;
+        wordTimes[0][2] = 36006;
+        wordTimes[0][3] = 36475;
+        wordTimes[0][4] = 36972;
+        wordTimes[0][5] = 37495;
+        wordTimes[0][6] = 37939;
+        wordTimes[1] = new long[7];
+        wordTimes[1][0] = 42641;
+        wordTimes[1][1] = 43085;
+        wordTimes[1][2] = 43476;
+        wordTimes[1][3] = 43869;
+        wordTimes[1][4] = 44443;
+        wordTimes[1][5] = 45017;
+        wordTimes[1][6] = 45488;
+        adapter.setWordTimes(wordTimes);
 
         // Start mp3 and call fuction
         mediaPlayer.start();
         SetTimeTotal();
         UpdateTimeSong();
-
         //Change time playing when change seekbar
         skSong.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int positon, boolean b) {
                 float currentPosition = positon / 1000;
-                adapter.setmCurrentPostion(positon);
+                adapter.updateCurrentTime(positon);
                 for (int i = 0; i < timeLyricLine.size() - 1; i++) {
                     float startTime = timeLyricLine.get(i);
                     float nextStartTime = timeLyricLine.get(i + 1);
                     if (currentPosition >= startTime && currentPosition < nextStartTime) {
-                        Log.d("startTime", startTime + "");
                         // Cập nhật vị trí của dòng hiện tại đang được phát
                         mCurrentLinePosition = i;
-                        // Cập nhật thời gian bắt đầu của dòng hiện tại đang được phát
-                        mCurrentLineStartTime = startTime;
                         // Cuộn ListView xuống dòng hiện tại đang được phát
                         recyclerViewSong.getLayoutManager().scrollToPosition(mCurrentLinePosition);
                         break;
                     }
                 }
             }
-
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
 
             }
-
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mediaPlayer.seekTo(skSong.getProgress());
             }
         });
-    }
-    private void createArray(){
-        for (int i=0;i<fullLyricLineArrayList.size();i++){
-            char ch = fullLyricLineArrayList.get(i).getText().charAt(0);
-            if (Character.isUpperCase(ch)){
 
-            } else {
 
-            }
-        }
     }
 
     private void readLyricsFromXml(int resourceId) throws XmlPullParserException, IOException {
@@ -136,8 +129,6 @@ public class MainActivity extends AppCompatActivity {
                 String text = parser.nextText();
                 //build Lyric for lyricLineArraylist
                 lyric.append(text);
-                // this is another arrayList. It is arrayList include startTime and Text
-                fullLyricLineArrayList.add(new Lyric(startTime,text));
             } else
                 // If meet new Line then ...
                 if (eventType == XmlPullParser.START_TAG && parser.getName().equals("param")) {
@@ -178,8 +169,6 @@ public class MainActivity extends AppCompatActivity {
                 // Get the start time of the first "line" tag
                 float startTime = Float.valueOf(parser.getAttributeValue(null, "va"));
                 timeLyricLine.add((float) (startTime - 0.2));
-                Log.d("startTime", startTime + "");
-                // Exit the loop
             }
             eventType = parser.next();
         }

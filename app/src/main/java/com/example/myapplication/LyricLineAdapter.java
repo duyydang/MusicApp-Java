@@ -1,15 +1,11 @@
 package com.example.myapplication;
 
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,24 +14,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class LyricLineAdapter extends RecyclerView.Adapter<LyricLineAdapter.ViewHolder> {
     Context context;
     List<String> lyricLineList;
-    int currentIndex = 0;
-    long mCurrentPostion;
-    String fullLyric;
+    private long mCurrentTime = 0; // thời gian hiện tại của bài hát
+    long[][] wordTimes = new long[26][];
 
-    public void setFullLyric(String fullLyric) {
-        this.fullLyric = fullLyric;
-    }
-
-    ArrayList<Float> lyricText = new ArrayList<>();
-
-    public void setmCurrentPostion(long mCurrentPostion) {
-        this.mCurrentPostion = mCurrentPostion;
+    public void setWordTimes(long[][] wordTimes) {
+        this.wordTimes = wordTimes;
     }
 
     public LyricLineAdapter(Context context, List<String> lyricLineList) {
@@ -59,50 +47,35 @@ public class LyricLineAdapter extends RecyclerView.Adapter<LyricLineAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         // remove space first
-//        lyricLineList.get(position).substring(1);
-//        // get startTimeWord similar postionLine from Arr[][]
-        List<Long> startTimeWord = new ArrayList<>();
-//        for (int i=0;i<lyricArrayList[position].length;i++){
-//            startTimeWord.add(lyricArrayList[position][i]);
-//        }
         holder.txtLyric.setText(lyricLineList.get(position));
-//        Log.d("linePostion", position+"");
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // Loading highlight Word this
-                hightlight(startTimeWord, lyricLineList.get(position), mCurrentPostion, holder.txtLyric);
-                handler.postDelayed(this, 50);
-            }
-        }, 1000);
+        highlightTextWithTiming(holder.txtLyric,lyricLineList.get(position),wordTimes[position],mCurrentTime);
     }
 
-    private void hightlight(List<Long> startTimes, String sentence, long currentTime, TextView textView) {
-        String[] words = sentence.split(" ");
-        float[] wordStartTimes = new float[words.length];
+    private void highlightTextWithTiming(TextView textView, String sentence, long[] timings, long currentTime) {
+        String[] words = sentence.split("\\s+"); // tách câu thành các từ riêng lẻ
+        SpannableString spannableString = new SpannableString(sentence); // tạo một SpannableString mới cho câu đó
         for (int i = 0; i < words.length; i++) {
-            if (i < startTimes.size()) {
-                wordStartTimes[i] = startTimes.get(i);
-            } else {
-                wordStartTimes[i] = startTimes.get(startTimes.size() - 1);
+            long wordStartTime = timings[i];
+            long wordEndTime = i == timings.length - 1 ? Long.MAX_VALUE : timings[i + 1]; // thời gian kết thúc của từ sau
+            if (currentTime >= wordStartTime && currentTime < wordEndTime) {
+                // nếu thời gian hiện tại nằm trong khoảng thời gian tô của từ đó, tô màu từ đó
+                ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(Color.RED);
+                spannableString.setSpan(foregroundColorSpan, 0, sentence.indexOf(words[i]) + words[i].length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
-        if (currentIndex < words.length && currentTime >= wordStartTimes[currentIndex]) {
-            String currentWord = words[currentIndex];
-            SpannableString spannableString = new SpannableString(sentence);
-            spannableString.setSpan(new ForegroundColorSpan(Color.RED), 0, sentence.indexOf(currentWord) + currentWord.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            textView.setText(spannableString);
-            currentIndex++;
-        }
+        textView.setText(spannableString); // set lại text view với các từ đã được tô màu
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView txtLyric;
-
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             txtLyric = (TextView) itemView.findViewById(R.id.textViewLineLyric);
         }
+    }
+    // hàm cập nhật mCurrentTime và notifyDataSetChanged()
+    public void updateCurrentTime(long currentTime) {
+        mCurrentTime = currentTime;
+        notifyDataSetChanged();
     }
 }
