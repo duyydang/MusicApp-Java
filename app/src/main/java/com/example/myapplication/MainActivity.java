@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     LyricLineAdapter adapter;
     private int mCurrentLinePosition = 0;
     long[][] wordTimes;
-    int x=0,y=0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,25 +56,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         convertTo2dArray();
-
-        // Test mảng 2 chiều
-//        wordTimes[0] = new long[7];
-//        wordTimes[0][0] = 35144;
-//        wordTimes[0][1] = 35587;
-//        wordTimes[0][2] = 36006;
-//        wordTimes[0][3] = 36475;
-//        wordTimes[0][4] = 36972;
-//        wordTimes[0][5] = 37495;
-//        wordTimes[0][6] = 37939;
-//        wordTimes[1] = new long[7];
-//        wordTimes[1][0] = 42641;
-//        wordTimes[1][1] = 43085;
-//        wordTimes[1][2] = 43476;
-//        wordTimes[1][3] = 43869;
-//        wordTimes[1][4] = 44443;
-//        wordTimes[1][5] = 45017;
-//        wordTimes[1][6] = 45488;
-
         adapter.setWordTimes(wordTimes);
 
         // Start mp3 and call fuction
@@ -99,42 +80,43 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
 
             }
+
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mediaPlayer.seekTo(skSong.getProgress());
             }
         });
-
-
     }
-    private void convertTo2dArray(){
+
+    private void convertTo2dArray() {
         int numSentences = 0;
-        for (Lyric word : fullLyric){
-            if(Character.isUpperCase(word.getText().charAt(0))){
+        for (Lyric word : fullLyric) {
+            if (Character.isUpperCase(word.getText().charAt(0))) {
                 numSentences++;
             }
         }
-        wordTimes = new long[numSentences+1][];
-
+        wordTimes = new long[numSentences + 1][];
         int start = 0;
         int sentenceIndex = 0;
-        for (int i = 0; i < fullLyric.size(); i++){
+        for (int i = 0; i < fullLyric.size(); i++) {
             String word = fullLyric.get(i).getText();
-            if (Character.isUpperCase(word.charAt(0))){
+            if (Character.isUpperCase(word.charAt(0))) {
                 int sentenceLength = i - start;
                 wordTimes[sentenceIndex] = new long[sentenceLength];
-                for ( int j = 0; j<sentenceLength; j++){
-                    wordTimes[sentenceIndex][j] = (long) (fullLyric.get(start+j).getStartTime()*1000);
+                for (int j = 0; j < sentenceLength; j++) {
+                    wordTimes[sentenceIndex][j] = (long) (fullLyric.get(start + j).getStartTime() * 1000);
                 }
                 sentenceIndex++;
-                start=i;
+                start = i;
             }
         }
     }
+
     private void readLyricsFromXml(int resourceId) throws XmlPullParserException, IOException {
         // Open the input stream for the XML file
         InputStream inputStream = getResources().openRawResource(resourceId);
@@ -157,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                 //build Lyric for lyricLineArraylist
                 lyric.append(text);
                 //add lyric and time
-                fullLyric.add(new Lyric(startTime,text));
+                fullLyric.add(new Lyric(startTime, text));
             } else
                 // If meet new Line then ...
                 if (eventType == XmlPullParser.START_TAG && parser.getName().equals("param")) {
