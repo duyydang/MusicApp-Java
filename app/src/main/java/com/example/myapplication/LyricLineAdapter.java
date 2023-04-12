@@ -48,7 +48,7 @@ public class LyricLineAdapter extends RecyclerView.Adapter<LyricLineAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         // remove space first
         holder.txtLyric.setText(lyricLineList.get(position));
-        highlightTextWithTiming(holder.txtLyric,lyricLineList.get(position),wordTimes[position],mCurrentTime);
+        highlightTextWithTiming(holder.txtLyric,lyricLineList.get(position),wordTimes[position+1],mCurrentTime);
     }
 
     private void highlightTextWithTiming(TextView textView, String sentence, long[] timings, long currentTime) {
